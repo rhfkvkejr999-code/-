@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f7fb;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      color: #1f2937;
+    }
+
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      font-size: 15px;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 28px;
+      font-weight: bold;
+      color: #111827;
+    }
+
+    .chart-container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>📊 Sales Dashboard</h1>
+
+  <div class="kpi-container">
+
+    <div class="card">
+      <h2>총 매출</h2>
+      <p id="sales">-</p>
+    </div>
+
+    <div class="card">
+      <h2>총 주문 수</h2>
+      <p id="orders">-</p>
+    </div>
+
+    <div class="card">
+      <h2>총 판매 수량</h2>
+      <p id="qty">-</p>
+    </div>
+
+  </div>
+
+  <div class="chart-container">
+    <canvas id="categoryChart"></canvas>
+  </div>
+
+  <script>
+
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyBH0ZiFtrKEj9QnoxrxVbl7aZEse7zh0RhZo2smYE12saS8JNM9owhjpsgQkDvxVHcJQ/exec";
+
+    async function loadDashboard() {
+
+      try {
+
+        const response = await fetch(WEBAPP_URL);
+        const data = await response.json();
+
+        document.getElementById("sales").innerText =
+          Number(data.totalSales).toLocaleString() + "원";
+
+        document.getElementById("orders").innerText =
+          data.totalOrders;
+
+        document.getElementById("qty").innerText =
+          data.totalQuantity;
+
+        const labels = [];
+        const values = [];
+
+        data.categories.forEach(item => {
+          labels.push(item.category);
+          values.push(item.amount);
+        });
+
+        new Chart(
+          document.getElementById("categoryChart"),
+          {
+            type: "pie",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  data: values
+                }
+              ]
+            }
+          }
+        );
+
+      } catch(error) {
+
+        console.error(error);
+        alert("데이터 불러오기 실패");
+
+      }
+
+    }
+
+    loadDashboard();
+
+  </script>
+
+</body>
+</html>
